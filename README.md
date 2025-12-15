@@ -23,7 +23,7 @@ npm install cronus
 ## 🧭 Quick start
 
 ```ts
-import { Cronus } from 'cronus';
+import { Cronus } from 'cron-txt';
 
 console.log(Cronus.translate('*/15 0 1,15 * 1-5', 'pt-BR'));
 // A cada 15 minutos, entre 00h00 e 00h59, nos dias 1 e 15 do mês, de segunda a sexta-feira
