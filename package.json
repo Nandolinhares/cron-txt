@@ -17,6 +17,7 @@
     "README.md"
   ],
   "scripts": {
+    "dev": "tsx watch playground.ts",
     "test": "vitest run",
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -53,6 +54,7 @@
     "eslint-plugin-prettier": "5.5.4",
     "prettier": "3.7.4",
     "tsup": "8.5.1",
+    "tsx": "4.21.0",
     "typescript": "5.9.3",
     "vitest": "4.0.15"
   }
