@@ -24,12 +24,11 @@ npm install cron-txt
 
 ```ts
 import { Cronus } from 'cron-txt';
+const every15MinutesPt = Cronus.translate('*/15 0 1,15 * 1-5', 'pt-BR');
+const every15MinutesEn = Cronus.translate('*/15 0 1,15 * 1-5', 'en');
 
-console.log(Cronus.translate('*/15 0 1,15 * 1-5', 'pt-BR'));
-// A cada 15 minutos, entre 00h00 e 00h59, nos dias 1 e 15 do mês, de segunda a sexta-feira
-
-console.log(Cronus.translate('*/15 0 1,15 * 1-5', 'en'));
-// Every 15 minutes, between 12:00 AM and 12:59 AM, on days 1 and 15 of the month, Monday through Friday
+// every15MinutesPt → A cada 15 minutos, entre 00h00 e 00h59, nos dias 1 e 15 do mês, de segunda a sexta-feira
+// every15MinutesEn → Every 15 minutes, between 12:00 AM and 12:59 AM, on days 1 and 15 of the month, Monday through Friday
 ```
 
 ### More examples

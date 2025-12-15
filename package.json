@@ -19,7 +19,7 @@
   "scripts": {
     "dev": "tsx watch playground.ts",
     "test": "vitest run",
-    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean --minify",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" \"test/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -44,6 +44,14 @@
     "node"
   ],
   "author": "Fernando Linhares",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nandolinhares/cron-txt.git"
+  },
+  "homepage": "https://github.com/Nandolinhares/cron-txt#readme",
+  "bugs": {
+    "url": "https://github.com/Nandolinhares/cron-txt/issues"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/node": "25.0.2",
