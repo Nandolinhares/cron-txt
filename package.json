@@ -1,7 +1,47 @@
 {
   "name": "cronus",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Parser Cron TS com suporte a i18n e Fuso Horário",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "yarn lint && yarn build"
+  },
+  "keywords": [
+    "cron",
+    "parser",
+    "cron-to-text",        
+    "cron-converter",
+    "cron-translator",
+    "cron-description",
+    "human-readable",
+    "schedule",
+    "typescript",
+    "portuguese",
+    "pt-br",
+    "en-us",
+    "i18n",
+    "react",
+    "vue",
+    "node"
+  ],
+  "author": "Fernando Linhares",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "25.0.2",
