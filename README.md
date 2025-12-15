@@ -1,4 +1,4 @@
-# Cronus
+# Cron-txt
 
 Humanize cron expressions in Brazilian Portuguese (pt-BR) and English with a tiny API and natural phrasing. Turn `*/15 0 1,15 * 1-5` into:
 
@@ -15,9 +15,9 @@ Humanize cron expressions in Brazilian Portuguese (pt-BR) and English with a tin
 ## 🚀 Install
 
 ```bash
-yarn add cronus
+yarn add cron-txt
 # or
-npm install cronus
+npm install cron-txt
 ```
 
 ## 🧭 Quick start
