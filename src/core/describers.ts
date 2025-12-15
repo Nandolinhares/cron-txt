@@ -1,7 +1,7 @@
 import { LOCALE_PACKS } from '../locales';
 import { LocalePack, NormalizedCron, ParsedField } from '../types';
 import { mapDay, mapMonth } from '../utils/aliases';
-import { capitalizeFirst, formatOrdinalDayPt, pad2 } from '../utils/strings';
+import { capitalizeFirst, pad2 } from '../utils/strings';
 import { parseField } from './parse-field';
 
 export function formatList(items: string[], t: LocalePack): string {

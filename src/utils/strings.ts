@@ -1,5 +1,5 @@
 export function pad2(n: string | number): string {
-  return String(n).padStart(2, "0");
+  return String(n).padStart(2, '0');
 }
 
 export function capitalizeFirst(text: string): string {

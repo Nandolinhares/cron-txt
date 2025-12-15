@@ -1,16 +1,11 @@
-import { NormalizedCron } from "../types";
+import { NormalizedCron } from '../types';
 
 export function normalizeCron(expr: string): NormalizedCron {
-  const clean = expr
-    .trim()
-    .replace(/["']/g, "")
-    .replace(/[–—]/g, "-")
-    .replace(/\s+/g, " ")
-    .trim();
+  const clean = expr.trim().replace(/["']/g, '').replace(/[–—]/g, '-').replace(/\s+/g, ' ').trim();
 
-  const parts = clean.split(" ");
+  const parts = clean.split(' ');
   if (parts.length < 5) {
-    throw new Error("Cron expression must have at least 5 fields");
+    throw new Error('Cron expression must have at least 5 fields');
   }
 
   if (parts.length === 5) {

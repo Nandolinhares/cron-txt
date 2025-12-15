@@ -1,4 +1,4 @@
-import { LOCALE_PACKS, resolveLocalePack } from '../locales';
+import { resolveLocalePack } from '../locales';
 import {
   describeDayOfMonth,
   describeDayOfWeek,

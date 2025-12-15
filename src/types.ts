@@ -1,4 +1,4 @@
-export type LocaleKey = "pt-BR" | "en" | string;
+export type LocaleKey = 'pt-BR' | 'en' | string;
 
 export type LocalePack = {
   days: string[];
@@ -34,16 +34,16 @@ export type LocalePack = {
 };
 
 export type FieldKind =
-  | "any"
-  | "literal"
-  | "list"
-  | "range"
-  | "step"
-  | "last"
-  | "weekdayNearest"
-  | "lastWeekday"
-  | "nthWeekday"
-  | "question";
+  | 'any'
+  | 'literal'
+  | 'list'
+  | 'range'
+  | 'step'
+  | 'last'
+  | 'weekdayNearest'
+  | 'lastWeekday'
+  | 'nthWeekday'
+  | 'question';
 
 export type ParsedField = {
   kind: FieldKind;
