@@ -10,6 +10,7 @@ import {
 } from './describers';
 import { normalizeCron } from './normalize-cron';
 import { parseField } from './parse-field';
+import { applyOffset } from './offset-cron';
 import { LocaleKey } from '../types';
 import { capitalizeFirst } from '../utils/strings';
 
@@ -89,9 +90,10 @@ function buildDayLayer(
   return pieces;
 }
 
-function translate(expr: string, locale: LocaleKey = 'pt-BR'): string {
+function translate(expr: string, locale: LocaleKey = 'pt-BR', offsetHours?: number): string {
   const t = resolveLocalePack(locale);
-  const normalized = normalizeCron(expr);
+  const base = normalizeCron(expr);
+  const normalized = typeof offsetHours === 'number' ? applyOffset(base, { hours: offsetHours }) : base;
 
   const timeLayer = describeTime(normalized, t);
 
@@ -140,8 +142,8 @@ const INTERNALS = Object.freeze({
 });
 
 export class Cronus {
-  static translate(expr: string, locale: LocaleKey = 'pt-BR'): string {
-    return translate(expr, locale);
+  static translate(expr: string, locale: LocaleKey = 'pt-BR', offsetHours?: number): string {
+    return translate(expr, locale, offsetHours);
   }
 
   static get internals() {
