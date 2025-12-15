@@ -55,25 +55,33 @@ type NormalizedCron = {
 declare function describeMonth(field: ParsedField, t: LocalePack): string;
 declare function describeDayOfMonth(field: ParsedField, t: LocalePack): string;
 declare function describeDayOfWeek(field: ParsedField, t: LocalePack): string;
+declare function describeDayOfWeekListNatural(field: ParsedField, t: LocalePack): string;
 declare function describeTime(parts: NormalizedCron, t: LocalePack): string;
 declare function describeYear(field: ParsedField | undefined, t: LocalePack): string;
+declare function joinParts(parts: string[], t: LocalePack): string;
 
 declare function normalizeCron(expr: string): NormalizedCron;
 
 declare function parseField(raw: string): ParsedField;
 
-declare function cronToReadable(expr: string, locale?: LocaleKey): string;
-declare const __cronReadableInternals: {
-    normalizeCron: typeof normalizeCron;
-    parseField: typeof parseField;
-    describeMonth: typeof describeMonth;
-    describeDayOfMonth: typeof describeDayOfMonth;
-    describeDayOfWeek: typeof describeDayOfWeek;
-    describeTime: typeof describeTime;
-    describeYear: typeof describeYear;
-};
+declare function translate(expr: string, locale?: LocaleKey): string;
+declare class Cronus {
+    static translate(expr: string, locale?: LocaleKey): string;
+    static get internals(): Readonly<{
+        normalizeCron: typeof normalizeCron;
+        parseField: typeof parseField;
+        describeTime: typeof describeTime;
+        describeMonth: typeof describeMonth;
+        describeDayOfMonth: typeof describeDayOfMonth;
+        describeDayOfWeek: typeof describeDayOfWeek;
+        describeDayOfWeekListNatural: typeof describeDayOfWeekListNatural;
+        describeYear: typeof describeYear;
+        joinParts: typeof joinParts;
+        translate: typeof translate;
+    }>;
+}
 
 declare const LOCALE_PACKS: Record<LocaleKey, LocalePack>;
 declare function resolveLocalePack(locale: LocaleKey): LocalePack;
 
-export { type FieldKind, LOCALE_PACKS, type LocaleKey, type LocalePack, type NormalizedCron, type ParsedField, __cronReadableInternals, cronToReadable, resolveLocalePack };
+export { Cronus, type FieldKind, LOCALE_PACKS, type LocaleKey, type LocalePack, type NormalizedCron, type ParsedField, resolveLocalePack };

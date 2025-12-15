@@ -8,13 +8,6 @@ function capitalizeFirst(text) {
   }
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
-function formatOrdinalDayPt(value) {
-  const num = Number(value);
-  if (Number.isNaN(num)) {
-    return value;
-  }
-  return `${num}\xBA`;
-}
 
 // src/locales/index.ts
 function ordinalSuffix(n) {
@@ -33,15 +26,7 @@ function ordinalSuffix(n) {
   return "th";
 }
 var EN_PACK = {
-  days: [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday"
-  ],
+  days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
   months: [
     "January",
     "February",
@@ -100,15 +85,7 @@ var EN_PACK = {
   }
 };
 var PT_PACK = {
-  days: [
-    "Domingo",
-    "Segunda",
-    "Ter\xE7a",
-    "Quarta",
-    "Quinta",
-    "Sexta",
-    "S\xE1bado"
-  ],
+  days: ["Domingo", "Segunda", "Ter\xE7a", "Quarta", "Quinta", "Sexta", "S\xE1bado"],
   months: [
     "janeiro",
     "fevereiro",
@@ -157,7 +134,8 @@ var PT_PACK = {
   timeSeparator: "h",
   formatTime: (hour, minute) => `${pad2(hour)}h${pad2(minute)}`,
   formatTimeVerbose: (hour, minute) => {
-    const base = `${pad2(hour)}h${pad2(minute)}`;
+    const h = String(hour);
+    const base = minute === 0 ? `${h}h` : `${h}h${pad2(minute)}`;
     if (hour < 12) {
       return `${base} da manh\xE3`;
     }
@@ -331,9 +309,7 @@ function describeMonth(field, t) {
     case "any":
       return t.everyMonth;
     case "list": {
-      const names = field.values?.map(
-        (m) => t.months[(Number(mapMonth(m)) - 1 + 12) % 12]
-      ) ?? [];
+      const names = field.values?.map((m) => t.months[(Number(mapMonth(m)) - 1 + 12) % 12]) ?? [];
       return formatList(names, t);
     }
     case "range": {
@@ -359,8 +335,13 @@ function describeDayOfMonth(field, t) {
     case "any":
     case "question":
       return "";
-    case "list":
-      return `${t.dayWord} ${formatList(field.values ?? [], t)}`;
+    case "list": {
+      const listText = formatList(field.values ?? [], t);
+      if (t === LOCALE_PACKS["pt-BR"]) {
+        return `${t.dayPlural} ${listText} do m\xEAs`;
+      }
+      return `${t.dayPlural} ${listText} ${t.ofMonth}`;
+    }
     case "range":
       return `${t.dayWord} ${field.start}${t.through}${field.end}`;
     case "step":
@@ -379,9 +360,12 @@ function describeDayOfMonth(field, t) {
       return t.lastDayOfMonth;
     case "literal":
       if (t === LOCALE_PACKS["pt-BR"]) {
-        return `${t.dayWord} ${formatOrdinalDayPt(field.raw)}`;
+        if (field.raw === "1") {
+          return "primeiro dia do m\xEAs";
+        }
+        return `${t.dayWord} ${field.raw} do m\xEAs`;
       }
-      return `${t.dayWord} ${field.raw}`;
+      return `${t.dayWord} ${field.raw} ${t.ofMonth}`;
     default:
       return field.raw;
   }
@@ -403,13 +387,7 @@ function describeDayOfWeek(field, t) {
         const lowerStart = start.toLowerCase();
         const lowerEnd = end.toLowerCase();
         const withFeira = (name) => ["segunda", "ter\xE7a", "quarta", "quinta", "sexta"].includes(name) ? `${name}-feira` : name;
-        const startWord = [
-          "segunda",
-          "ter\xE7a",
-          "quarta",
-          "quinta",
-          "sexta"
-        ].includes(lowerStart) ? lowerStart : withFeira(lowerStart);
+        const startWord = ["segunda", "ter\xE7a", "quarta", "quinta", "sexta"].includes(lowerStart) ? lowerStart : withFeira(lowerStart);
         const endWord = withFeira(lowerEnd);
         const sep = " a ";
         return `${startWord}${sep}${endWord}`;
@@ -427,13 +405,7 @@ function describeDayOfWeek(field, t) {
       if (weekday) {
         if (t === LOCALE_PACKS["pt-BR"]) {
           const lower = weekday.toLowerCase();
-          const withFeira = [
-            "segunda",
-            "ter\xE7a",
-            "quarta",
-            "quinta",
-            "sexta"
-          ].includes(lower) ? `${lower}-feira` : lower;
+          const withFeira = ["segunda", "ter\xE7a", "quarta", "quinta", "sexta"].includes(lower) ? `${lower}-feira` : lower;
           const capitalized = capitalizeFirst(withFeira);
           return t.lastWeekdayOfMonth(capitalized);
         }
@@ -493,11 +465,44 @@ function describeTime(parts, t) {
   const hours = hourField.kind === "list" ? hourField.values ?? [] : [hourField.raw];
   const fixedHour = hourField.kind === "literal" || hourField.kind === "list";
   const fixedMinute = minField.kind === "literal" || minField.kind === "list";
+  if (minField.kind === "literal" && hourField.kind === "range") {
+    const minute = Number(minField.raw);
+    const startHour = Number(hourField.start ?? 0);
+    const endHour = Number(hourField.end ?? startHour);
+    const every = t.everyHour("1");
+    if (t === LOCALE_PACKS["pt-BR"]) {
+      const startText2 = minute === 0 ? `${startHour}h` : `${startHour}h${pad2(minute)}`;
+      const endText2 = `${endHour}h59`;
+      return `${capitalizeFirst(every)}, entre ${startText2} e ${endText2}`;
+    }
+    const startText = t.formatTime(startHour, minute);
+    const endText = t.formatTime(endHour, 59);
+    return `${capitalizeFirst(every)}, between ${startText} and ${endText}`;
+  }
+  if (minField.kind === "step" && fixedHour) {
+    const step = minField.step ?? "1";
+    if (hours.length === 1) {
+      const hourNum = Number(hours[0]);
+      const start = t.formatTime(hourNum, 0);
+      const end = t.formatTime(hourNum, 59);
+      const every2 = `${t.everyMinute(step)}`;
+      const between = t === LOCALE_PACKS["pt-BR"] ? `entre ${start} e ${end}` : `between ${start} and ${end}`;
+      return `${capitalizeFirst(every2)}, ${between}`;
+    }
+    const startTimes = hours.map((h) => t.formatTime(Number(h), 0));
+    const every = `${t.everyMinute(step)}`;
+    const atHours = t === LOCALE_PACKS["pt-BR"] ? `\xE0s ${formatList(startTimes, t)}` : `${t.at} ${formatList(startTimes, t)}`;
+    return `${capitalizeFirst(every)}, ${atHours}`;
+  }
   if (fixedHour && fixedMinute) {
     const combos = [];
     hours.forEach((h) => {
       minutes.forEach((m) => {
-        combos.push(t.formatTime(Number(h), Number(m)));
+        const hourNum = Number(h);
+        const minuteNum = Number(m);
+        const useVerbose = t === LOCALE_PACKS["pt-BR"] && hourNum > 0 && hourNum < 12 && minuteNum !== 0 ? true : t === LOCALE_PACKS["pt-BR"] && hourNum > 0 && hourNum < 12 && minuteNum === 0 ? true : false;
+        const formatter = useVerbose ? t.formatTimeVerbose ?? t.formatTime : t.formatTime;
+        combos.push(formatter(hourNum, minuteNum));
       });
     });
     return `${capitalizeFirst(t.at)} ${formatList(combos, t)}`;
@@ -543,6 +548,16 @@ function joinParts(parts, t) {
     return `${filtered[0]}, ${filtered[1]}`;
   }
   if (filtered.length === 2 && t === LOCALE_PACKS["pt-BR"] && filtered[1].trim().startsWith("\xC0")) {
+    return `${filtered[0]}, ${filtered[1]}`;
+  }
+  if (filtered.length === 2 && t === LOCALE_PACKS["pt-BR"] && filtered[1].trim().toLowerCase().startsWith("somente")) {
+    return `${filtered[0]}, ${filtered[1]}`;
+  }
+  if (filtered.length >= 2 && t === LOCALE_PACKS["pt-BR"] && filtered[filtered.length - 1].trim().toLowerCase().startsWith("somente")) {
+    const last2 = filtered.pop();
+    return `${filtered.join(", ")}, ${last2}`;
+  }
+  if (filtered.length === 2 && t !== LOCALE_PACKS["pt-BR"]) {
     return `${filtered[0]}, ${filtered[1]}`;
   }
   const last = filtered.pop();
@@ -592,102 +607,98 @@ function normalizeCron(expr) {
   };
 }
 
-// src/core/cron-to-readable.ts
-function cronToReadable(expr, locale = "pt-BR") {
-  if (!expr) {
-    return "";
-  }
+// src/core/cronus.ts
+function buildDayLayer(locale, dayOfMonthText, dayOfWeekText, monthText, yearText, hasEveryMonth, hasEveryYear) {
   const t = resolveLocalePack(locale);
-  let parts;
-  try {
-    parts = normalizeCron(expr);
-  } catch {
-    return expr;
+  const pieces = [];
+  const hasDayOfMonth = Boolean(dayOfMonthText);
+  const hasDayOfWeek = Boolean(dayOfWeekText);
+  if (hasDayOfMonth) {
+    const monthSegment = !hasEveryMonth && monthText ? monthText : "";
+    if (locale === "pt-BR") {
+      const preposition = dayOfMonthText.startsWith(t.dayPlural) ? "nos" : dayOfMonthText.startsWith("primeiro dia") ? t.on : "do";
+      pieces.push(`${preposition} ${dayOfMonthText}`.trim());
+      if (monthSegment) {
+        pieces.push(`somente em ${monthSegment}`.trim());
+      }
+    } else {
+      pieces.push(`on ${dayOfMonthText}`.trim());
+      if (monthSegment) {
+        pieces.push(`only in ${monthSegment}`.trim());
+      }
+    }
+  } else if (!hasEveryMonth && monthText) {
+    pieces.push(`${t.in} ${monthText}`.trim());
   }
-  const month = describeMonth(parseField(parts.month), t);
-  const domField = parseField(parts.dayOfMonth);
-  const dowField = parseField(parts.dayOfWeek);
-  const dom = describeDayOfMonth(domField, t);
-  const dow = describeDayOfWeek(dowField, t);
-  const year = describeYear(parts.year ? parseField(parts.year) : void 0, t);
-  const time = describeTime(parts, t);
-  const dayLayer = (() => {
-    if (domField.kind === "any" && dowField.kind === "any") {
-      return t.everyDay;
+  if (hasDayOfWeek) {
+    if (locale === "pt-BR") {
+      const lower = dayOfWeekText.toLowerCase();
+      const weekdayWord = ["segunda", "ter\xE7a", "quarta", "quinta", "sexta"].includes(lower) ? `${lower}s-feiras` : lower.endsWith("o") ? `${lower}s` : lower;
+      const prefix = hasDayOfMonth ? "de" : "somente \xE0s";
+      pieces.push(`${prefix} ${weekdayWord}`.trim());
+    } else {
+      const phrase = hasDayOfMonth ? `on ${dayOfWeekText}` : `only on ${dayOfWeekText}`;
+      pieces.push(phrase.trim());
     }
-    if (domField.kind === "any") {
-      if (dowField.kind === "list") {
-        return `${t.onlyOn} ${describeDayOfWeekListNatural(dowField, t)}`;
-      }
-      if (dowField.kind === "literal") {
-        const fauxList = {
-          ...dowField,
-          kind: "list",
-          values: [dowField.raw]
-        };
-        return `${t.onlyOn} ${describeDayOfWeekListNatural(fauxList, t)}`;
-      }
+  }
+  if (yearText) {
+    if (hasEveryYear) {
+      pieces.push(yearText.trim());
+    } else {
+      pieces.push(`${t.in} ${yearText}`.trim());
     }
-    return [dom, dow].filter(Boolean).join(" ").trim();
-  })();
-  const monthPhrase = month === t.everyMonth ? "" : month;
-  const dayLayerWithMonthContext = (() => {
-    if (monthPhrase || domField.kind === "any" || domField.kind === "question" || domField.kind === "last" || domField.kind === "lastWeekday") {
-      return dayLayer;
-    }
-    if (domField.kind === "weekdayNearest") {
-      return `${dayLayer} ${t.ofMonth}`;
-    }
-    return `${dayLayer} ${t.ofMonth}`.trim();
-  })();
-  const dayLayerWithPreposition = (() => {
-    if (!dayLayerWithMonthContext) {
-      return "";
-    }
-    if (dayLayerWithMonthContext === t.everyDay || dayLayerWithMonthContext.startsWith(t.onlyOn)) {
-      return dayLayerWithMonthContext;
-    }
-    if (domField.kind === "any" && dowField.kind === "range") {
-      if (t === LOCALE_PACKS["pt-BR"]) {
-        const phrase = dayLayerWithMonthContext.startsWith("de") ? dayLayerWithMonthContext : `de ${dayLayerWithMonthContext}`;
-        return phrase.trim();
-      }
-      return dayLayerWithMonthContext;
-    }
-    return `${t.on} ${dayLayerWithMonthContext}`;
-  })();
-  const pieces = (() => {
-    const base = [
-      time,
-      dayLayerWithPreposition,
-      monthPhrase ? `${t.in} ${monthPhrase}` : "",
-      year
-    ];
-    if (t === LOCALE_PACKS["pt-BR"] && dayLayerWithPreposition && domField.kind !== "any") {
-      const dayPhrase = capitalizeFirst(dayLayerWithPreposition);
-      return [
-        dayPhrase,
-        time,
-        monthPhrase ? `${t.in} ${monthPhrase}` : "",
-        year
-      ];
-    }
-    return base;
-  })();
-  return joinParts(pieces, t);
+  }
+  return pieces;
 }
-var __cronReadableInternals = {
+function translate(expr, locale = "pt-BR") {
+  const t = resolveLocalePack(locale);
+  const normalized = normalizeCron(expr);
+  const timeLayer = describeTime(normalized, t);
+  const monthField = parseField(normalized.month);
+  const dayOfMonthField = parseField(normalized.dayOfMonth);
+  const dayOfWeekField = parseField(normalized.dayOfWeek);
+  const yearField = normalized.year ? parseField(normalized.year) : void 0;
+  const dayOfWeekText = dayOfWeekField.kind === "list" && (dayOfWeekField.values?.length ?? 0) > 1 ? describeDayOfWeekListNatural(dayOfWeekField, t) : describeDayOfWeek(dayOfWeekField, t);
+  const monthText = describeMonth(monthField, t);
+  const hasEveryMonth = monthText === t.everyMonth;
+  const dayOfMonthText = describeDayOfMonth(dayOfMonthField, t);
+  const yearText = describeYear(yearField, t);
+  const hasEveryYear = yearText === t.everyYear;
+  const dayLayers = buildDayLayer(
+    locale,
+    dayOfMonthText,
+    dayOfWeekText,
+    monthText,
+    yearText,
+    hasEveryMonth,
+    hasEveryYear
+  );
+  const parts = [timeLayer, ...dayLayers];
+  const sentence = joinParts(parts, t).trim();
+  return capitalizeFirst(sentence || timeLayer || "");
+}
+var INTERNALS = Object.freeze({
   normalizeCron,
   parseField,
+  describeTime,
   describeMonth,
   describeDayOfMonth,
   describeDayOfWeek,
-  describeTime,
-  describeYear
+  describeDayOfWeekListNatural,
+  describeYear,
+  joinParts,
+  translate
+});
+var Cronus = class {
+  static translate(expr, locale = "pt-BR") {
+    return translate(expr, locale);
+  }
+  static get internals() {
+    return INTERNALS;
+  }
 };
 export {
+  Cronus,
   LOCALE_PACKS,
-  __cronReadableInternals,
-  cronToReadable,
   resolveLocalePack
 };
