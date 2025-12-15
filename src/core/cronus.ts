@@ -93,7 +93,8 @@ function buildDayLayer(
 function translate(expr: string, locale: LocaleKey = 'pt-BR', offsetHours?: number): string {
   const t = resolveLocalePack(locale);
   const base = normalizeCron(expr);
-  const normalized = typeof offsetHours === 'number' ? applyOffset(base, { hours: offsetHours }) : base;
+  const normalized =
+    typeof offsetHours === 'number' ? applyOffset(base, { hours: offsetHours }) : base;
 
   const timeLayer = describeTime(normalized, t);
 
