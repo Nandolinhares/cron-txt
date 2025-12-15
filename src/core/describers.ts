@@ -208,17 +208,18 @@ export function describeTime(parts: NormalizedCron, t: LocalePack): string {
     const minute = Number(minField.raw);
     const startHour = Number(hourField.start ?? 0);
     const endHour = Number(hourField.end ?? startHour);
-    const every = t.everyHour('1');
+    const everyPt = 'a cada hora';
+    const everyEn = 'every hour';
 
     if (t === LOCALE_PACKS['pt-BR']) {
       const startText = minute === 0 ? `${startHour}h` : `${startHour}h${pad2(minute)}`;
       const endText = `${endHour}h59`;
-      return `${capitalizeFirst(every)}, entre ${startText} e ${endText}`;
+      return `${capitalizeFirst(everyPt)}, entre ${startText} e ${endText}`;
     }
 
     const startText = t.formatTime(startHour, minute);
     const endText = t.formatTime(endHour, 59);
-    return `${capitalizeFirst(every)}, between ${startText} and ${endText}`;
+    return `${capitalizeFirst(everyEn)}, between ${startText} and ${endText}`;
   }
 
   if (minField.kind === 'step' && fixedHour) {
@@ -248,11 +249,10 @@ export function describeTime(parts: NormalizedCron, t: LocalePack): string {
         const hourNum = Number(h);
         const minuteNum = Number(m);
         const useVerbose =
-          t === LOCALE_PACKS['pt-BR'] && hourNum > 0 && hourNum < 12 && minuteNum !== 0
-            ? true
-            : t === LOCALE_PACKS['pt-BR'] && hourNum > 0 && hourNum < 12 && minuteNum === 0
-              ? true
-              : false;
+          t === LOCALE_PACKS['pt-BR'] &&
+          hourNum > 0 &&
+          hourNum < 12 &&
+          (minuteNum !== 0 || hourNum <= 6);
         const formatter = useVerbose ? (t.formatTimeVerbose ?? t.formatTime) : t.formatTime;
         combos.push(formatter(hourNum, minuteNum));
       });
@@ -324,6 +324,30 @@ export function joinParts(parts: string[], t: LocalePack): string {
   if (
     filtered.length >= 2 &&
     t === LOCALE_PACKS['pt-BR'] &&
+    filtered[filtered.length - 1].trim().toLowerCase().startsWith('dos ')
+  ) {
+    const last = filtered.pop();
+    return `${filtered.join(', ')}, ${last}`;
+  }
+  if (
+    filtered.length >= 2 &&
+    t === LOCALE_PACKS['pt-BR'] &&
+    filtered[filtered.length - 1].trim().toLowerCase().startsWith('do ')
+  ) {
+    const last = filtered.pop();
+    return `${filtered.join(', ')}, ${last}`;
+  }
+  if (
+    filtered.length >= 2 &&
+    t === LOCALE_PACKS['pt-BR'] &&
+    filtered[filtered.length - 1].trim().toLowerCase().startsWith('de ')
+  ) {
+    const last = filtered.pop();
+    return `${filtered.join(', ')}, ${last}`;
+  }
+  if (
+    filtered.length >= 2 &&
+    t === LOCALE_PACKS['pt-BR'] &&
     filtered[filtered.length - 1].trim().toLowerCase().startsWith('somente')
   ) {
     const last = filtered.pop();
@@ -331,6 +355,14 @@ export function joinParts(parts: string[], t: LocalePack): string {
   }
   if (filtered.length === 2 && t !== LOCALE_PACKS['pt-BR']) {
     return `${filtered[0]}, ${filtered[1]}`;
+  }
+  if (
+    filtered.length >= 2 &&
+    t !== LOCALE_PACKS['pt-BR'] &&
+    /sunday|monday|tuesday|wednesday|thursday|friday|saturday/i.test(filtered[filtered.length - 1])
+  ) {
+    const last = filtered.pop();
+    return `${filtered.join(', ')}, ${last}`;
   }
   const last = filtered.pop();
   return `${filtered.join(', ')}${t.andWord}${last}`;

@@ -31,7 +31,9 @@ function buildDayLayer(
     const monthSegment = !hasEveryMonth && monthText ? monthText : '';
     if (locale === 'pt-BR') {
       const preposition = dayOfMonthText.startsWith(t.dayPlural)
-        ? 'nos'
+        ? hasDayOfWeek
+          ? 'nos'
+          : 'dos'
         : dayOfMonthText.startsWith('primeiro dia')
           ? t.on
           : 'do';
@@ -57,10 +59,21 @@ function buildDayLayer(
         : lower.endsWith('o')
           ? `${lower}s`
           : lower;
-      const prefix = hasDayOfMonth ? 'de' : 'somente às';
+      const prefix = hasDayOfMonth
+        ? 'de'
+        : dayOfWeekText.includes(' a ')
+          ? 'de'
+          : weekdayWord.includes('feira')
+            ? 'somente às'
+            : 'somente aos';
       pieces.push(`${prefix} ${weekdayWord}`.trim());
     } else {
-      const phrase = hasDayOfMonth ? `on ${dayOfWeekText}` : `only on ${dayOfWeekText}`;
+      const needsBare = !hasDayOfMonth && dayOfWeekText.includes('through');
+      const phrase = hasDayOfMonth
+        ? dayOfWeekText
+        : needsBare
+          ? dayOfWeekText
+          : `only on ${dayOfWeekText}`;
       pieces.push(phrase.trim());
     }
   }
