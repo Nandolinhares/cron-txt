@@ -145,6 +145,7 @@ export const LOCALE_PACKS: Record<LocaleKey, LocalePack> = {
   'en-US': EN_PACK,
 };
 
+/** Get a locale pack by key, defaulting to pt-BR when missing. */
 export function resolveLocalePack(locale: LocaleKey): LocalePack {
   return LOCALE_PACKS[locale] ?? LOCALE_PACKS['pt-BR'];
 }

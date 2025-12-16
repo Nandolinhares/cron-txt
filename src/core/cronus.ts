@@ -11,7 +11,7 @@ import {
 import { normalizeCron } from './normalize-cron';
 import { parseField } from './parse-field';
 import { applyOffset } from './offset-cron';
-import { LocaleKey } from '../types';
+import { LocaleKey, TranslateOptions } from '../types';
 import { capitalizeFirst } from '../utils/strings';
 
 function buildDayLayer(
@@ -90,9 +90,14 @@ function buildDayLayer(
   return pieces;
 }
 
-function translate(expr: string, locale: LocaleKey = 'pt-BR', offsetHours?: number): string {
+/**
+ * Translate a cron expression into natural language.
+ * @param options Contains the cron expression and localization options.
+ */
+function translate(options: TranslateOptions): string {
+  const { expression, locale = 'pt-BR', offsetHours } = options;
   const t = resolveLocalePack(locale);
-  const base = normalizeCron(expr);
+  const base = normalizeCron(expression);
   const normalized =
     typeof offsetHours === 'number' ? applyOffset(base, { hours: offsetHours }) : base;
 
@@ -142,9 +147,17 @@ const INTERNALS = Object.freeze({
   translate,
 });
 
+/**
+ * Entry point for translating cron expressions to natural language.
+ */
 export class Cronus {
-  static translate(expr: string, locale: LocaleKey = 'pt-BR', offsetHours?: number): string {
-    return translate(expr, locale, offsetHours);
+  /**
+   * Translate a cron expression into natural language.
+   * @example
+   * Cronus.translate({ expression: '0 12 * * MON-FRI', locale: 'en' });
+   */
+  static translate(options: TranslateOptions): string {
+    return translate(options);
   }
 
   static get internals() {

@@ -72,56 +72,62 @@ const cases = [
 describe('Cronus.translate', () => {
   it('matches Portuguese outputs', () => {
     for (const c of cases) {
-      expect(Cronus.translate(c.expr, 'pt-BR')).toBe(c.pt);
+      expect(Cronus.translate({ expression: c.expr, locale: 'pt-BR' })).toBe(c.pt);
     }
   });
 
   it('matches English outputs', () => {
     for (const c of cases) {
-      expect(Cronus.translate(c.expr, 'en')).toBe(c.en);
+      expect(Cronus.translate({ expression: c.expr, locale: 'en' })).toBe(c.en);
     }
   });
 
   it('handles list formatter ordering independently', () => {
-    expect(Cronus.translate('0 12 5,1 * *', 'en')).toBe(
+    expect(Cronus.translate({ expression: '0 12 5,1 * *', locale: 'en' })).toBe(
       'At 12:00 PM, on days 5 and 1 of the month',
     );
-    expect(Cronus.translate('0 12 5,1 * *', 'pt-BR')).toBe('Às 12h00, dos dias 5 e 1 do mês');
+    expect(Cronus.translate({ expression: '0 12 5,1 * *', locale: 'pt-BR' })).toBe(
+      'Às 12h00, dos dias 5 e 1 do mês',
+    );
   });
 
   it('keeps range wording for weekdays', () => {
-    expect(Cronus.translate('0 8 * * MON-FRI', 'en')).toBe('At 08:00 AM, Monday through Friday');
-    expect(Cronus.translate('0 8 * * MON-FRI', 'pt-BR')).toBe('Às 08h00, de segunda a sexta-feira');
+    expect(Cronus.translate({ expression: '0 8 * * MON-FRI', locale: 'en' })).toBe(
+      'At 08:00 AM, Monday through Friday',
+    );
+    expect(Cronus.translate({ expression: '0 8 * * MON-FRI', locale: 'pt-BR' })).toBe(
+      'Às 08h00, de segunda a sexta-feira',
+    );
   });
 
   it('applies hour offset (wrap)', () => {
-    const pt = Cronus.translate('0 12 * * *', 'pt-BR', 14);
+    const pt = Cronus.translate({ expression: '0 12 * * *', locale: 'pt-BR', offsetHours: 14 });
     expect(pt).toMatch(/Às (02h00|2h da manhã)/);
   });
 
   it('offset works on lists', () => {
-    const en = Cronus.translate('0 8,16 * * *', 'en', 10);
+    const en = Cronus.translate({ expression: '0 8,16 * * *', locale: 'en', offsetHours: 10 });
     expect(en).toMatch(/At .* (06:00 PM|02:00 AM)/);
   });
 
   it('supports negative offset (pt-BR)', () => {
-    const pt = Cronus.translate('0 3 * * *', 'pt-BR', -5);
+    const pt = Cronus.translate({ expression: '0 3 * * *', locale: 'pt-BR', offsetHours: -5 });
     expect(pt).toMatch(/Às 22h00|10h da noite/);
   });
 
   it('supports negative offset (en)', () => {
-    const en = Cronus.translate('0 1 * * *', 'en', -3);
+    const en = Cronus.translate({ expression: '0 1 * * *', locale: 'en', offsetHours: -3 });
     expect(en).toMatch(/At 10:00 PM|At 10:00 PM, every day/);
   });
 
   it('offset on hour range keeps wording', () => {
-    const en = Cronus.translate('0 9-17 * * *', 'en', 2);
+    const en = Cronus.translate({ expression: '0 9-17 * * *', locale: 'en', offsetHours: 2 });
     expect(en).toMatch(/Every hour, between .* and .*/);
   });
 
   it('offset on step base preserves step', () => {
     // every 2 hours at minute 15, base 1 -> shifted by +3 hours
-    const pt = Cronus.translate('15 1/2 * * *', 'pt-BR', 3);
+    const pt = Cronus.translate({ expression: '15 1/2 * * *', locale: 'pt-BR', offsetHours: 3 });
     expect(pt).toMatch(/A cada 2 horas/);
   });
 });

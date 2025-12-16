@@ -47,6 +47,9 @@ function offsetField(raw: string, delta: number, min: number, max: number): stri
   }
 }
 
+/**
+ * Apply hour or minute offsets to a normalized cron expression, wrapping values as needed.
+ */
 export function applyOffset(
   cron: NormalizedCron,
   opts: { hours?: number; minutes?: number },

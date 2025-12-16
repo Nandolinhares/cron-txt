@@ -33,6 +33,16 @@ export type LocalePack = {
   formatTimeVerbose?: (hour: number, minute: number) => string;
 };
 
+/** Options for translating a cron expression to human-readable text. */
+export type TranslateOptions = {
+  /** Cron expression with 5 to 7 fields (seconds and year are optional). */
+  expression: string;
+  /** Locale to use. Defaults to "pt-BR". */
+  locale?: LocaleKey;
+  /** Optional hour offset (can be negative). */
+  offsetHours?: number;
+};
+
 export type FieldKind =
   | 'any'
   | 'literal'
